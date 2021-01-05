@@ -16,13 +16,13 @@ public class MultiDeliveryDeskTest {
     Book book3 = new Book();
     String student1 = "Emily";
     String student2 = "Olivia";
-    String student3 = "Blunt";
+    String student3 = "Blunt"; // не используется
 
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
     @Test
-    public void multiDeliveryDeskTest() {
+    public void multiDeliveryDeskTest() { // это ваше чо? пустой метод
     }
 
     @Test
@@ -39,37 +39,41 @@ public class MultiDeliveryDeskTest {
         mdd.addNewBook(book1);
     }
 
-    private void exPrepare(String message) {
+    private void exPrepare(String message) { // название не оч хорошее, лучше - expectException
         expectedEx.expect(IllegalArgumentException.class);
         expectedEx.expectMessage(message);
     }
 
     @Test
-    public void addNullBookTitleTest() {
+    public void addNullBookTitleTest() { // addNewBookConvertNullTitle
         mdd.addNewBook(new Book());
         Assert.assertEquals("null", mdd.findAvailableBooks().get(0).title);
     }
 
     @Test
-    public void addEmptyBookTitleTest() {
+    public void addEmptyBookTitleTest() { // addNewBookNameTrimmedTest
         book0.title = "  ";
         mdd.addNewBook(book0);
         Assert.assertEquals("", mdd.findAvailableBooks().get(0).title);
     }
 
     @Test
-    public void addNotUniqueTitleTest() {
+    public void addNotUniqueTitleTest() { // addNewBookItIsPossibleToAddBooksWithNonUniqueNamesTest
         book0.id = 1;
         mdd.addNewBook(book0);
         book1.id = 2;
         mdd.addNewBook(book1);
         book2.id = 3;
         mdd.addNewBook(book2);
+
+        //ни единого ассерта
     }
 
     @Test
     public void addCorrectBookTest() {
         addSomeBooks(book0, book1, book2);
+        //какие-то выборочные ассерты, почему бы не проверитиь вообще все?
+
         Assert.assertEquals(0, mdd.findAvailableBooks().get(0).id);
         Assert.assertEquals("book2", mdd.findAvailableBooks().get(2).title);
     }
@@ -185,11 +189,11 @@ public class MultiDeliveryDeskTest {
     @Before
     public void beforeTest() {
         mdd = new MultiDeliveryDesk();
-        bookList = new ArrayList<>();
+        bookList = new ArrayList<>(); // не используется
     }
 
     @After
-    public void clear() {
+    public void clear() { //вообще не нужно
         mdd = null;
         bookList = null;
     }
@@ -202,7 +206,7 @@ public class MultiDeliveryDeskTest {
         }
     }
 
-    private void addSomeBooks(int number) {
+    private void addSomeBooks(int number) { // не используется
         Book book = new Book();
         for (int i = 0; i < number; i++) {
             book.id = i;
