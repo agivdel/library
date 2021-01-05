@@ -29,6 +29,11 @@ public class MultiDeliveryDesk implements Library {
         if (availableBooks.containsKey(book.id) || borrowedBooks.containsKey(book.id)) {
             throw new IllegalArgumentException(String.format(Constants.alreadyAddedId, book.id));
         }
+        //давеча ты говорил, что null title - это не круто
+        //таперича ты просто меняешь null на строку "null"
+        //при этом просто пустую строку ты никак не маскируешь?
+        //то есть у тебя возможно и "", и "null", хотя логически это одно и то же
+        //обычно программисты заменяют null на пустую строку, или наоборот, чтоб в системе было единственное представление пустой строки
         String title = Utils.nullOrEmptyToCorrect(book.title);
         if (Utils.isNotUniqueTitle(title, this)) {
             System.out.println(Constants.notUniqueTitle + Utils.notUniqueTitleNumbers(title, this));
