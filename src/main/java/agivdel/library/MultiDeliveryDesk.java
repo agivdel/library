@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Получилось несколько абонементов библиотеки, каждый со своими независимыми списками книг.
- * Книгу может возвращать любой студент, а не только тот, кто ее брал.
+ * Книгу может возвращать только тот, кто ее брал.
  */
 public class MultiDeliveryDesk implements Library {
     private final Map<Integer, String> availableBooks;
