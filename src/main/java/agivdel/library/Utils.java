@@ -38,7 +38,6 @@ public class Utils {
             throw new IllegalArgumentException(Constants.notNullOrEmptyStudentName + Constants.notBorrowed);
         }
     }
-
     // этот метод - единственный, который помещен сюда по праву
     // остальные могут быть приватными методами MultiDeliveryDesk
     // вот если бы у тебя тут было бы больше одного класса библиотеки - тогда имело бы  смысл их вынести сюда чтоб использовать из обоих классов

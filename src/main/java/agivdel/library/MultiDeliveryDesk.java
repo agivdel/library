@@ -29,6 +29,7 @@ public class MultiDeliveryDesk implements Library {
         if (availableBooks.containsKey(book.id) || borrowedBooks.containsKey(book.id)) {
             throw new IllegalArgumentException(String.format(Constants.alreadyAddedId, book.id));
         }
+
         //давеча ты говорил, что null title - это не круто
         //таперича ты просто меняешь null на строку "null"
         //при этом просто пустую строку ты никак не маскируешь?
