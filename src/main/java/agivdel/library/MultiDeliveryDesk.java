@@ -20,7 +20,7 @@ public class MultiDeliveryDesk implements Library {
 
     /**
      * Метод не принимает null вместо книги.
-     * Метод преобразует title=null в title="null".
+     * Метод преобразует title из null и любого числа пробелов в title="".
      * Метод принимает title="" и другие неуникальные title (т.е. книга с неуникальными title записывается).
      * Книга с неуникальным id не записывается (т.е. и перезаписать имеющуюся книгу нельзя).
      * Имеющуюся книгу нельзя изменить снаружи.
@@ -31,18 +31,6 @@ public class MultiDeliveryDesk implements Library {
         if (availableBooks.containsKey(book.id) || borrowedBooks.containsKey(book.id)) {
             throw new IllegalArgumentException(String.format("The book.id %d already added.", book.id));
         }
-
-        //давеча ты говорил, что null title - это не круто
-        //таперича ты просто меняешь null на строку "null"
-        //при этом просто пустую строку ты никак не маскируешь?
-        //то есть у тебя возможно и "", и "null", хотя логически это одно и то же
-        //обычно программисты заменяют null на пустую строку, или наоборот, чтоб в системе было единственное представление пустой строки
-
-        //АГ: null возникает, когда после создания объекта Book поле title вообще не трогали.
-        //А title="" означает, что поле после создания объекта меняли.
-        //Другими словами, для класса MultiDeliveryDesk это одна и та же ситуация, но для отправителя - разные.
-        //Я посчитал, что пусть программа не будет "слишком умной" и покажет разный результат,
-        //если пользователь подает ей на вход разные данные.
         String title = nullOrEmptyToCorrect(book.title);
         long notUniqueTitles = notUniqueTitleNumbers(title);
         if (notUniqueTitles > 0) {
@@ -58,12 +46,7 @@ public class MultiDeliveryDesk implements Library {
     }
 
     public String nullOrEmptyToCorrect(String str) {
-        if (str == null) {
-            str = "null";
-        } else {
-            str = str.trim();
-        }
-        return str;
+        return str == null ? "" :  str.trim();
     }
 
     public long notUniqueTitleNumbers(String title) {

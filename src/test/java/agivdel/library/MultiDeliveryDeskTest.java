@@ -32,27 +32,28 @@ public class MultiDeliveryDeskTest {
 
     @Test
     public void addNullBookTest() {
-        exPrepare("Book can't be null.");
+        expectedException("Book can't be null.");
         mdd.addNewBook(null);
     }
 
     @Test
     public void addNotUniqueIdTest() {
-        exPrepare(String.format("The book.id %d already added.", book1.id));
+        expectedException(String.format("The book.id %d already added.", book1.id));
         addSomeBooks(book0);
         book1.id = 0;
         mdd.addNewBook(book1);
     }
 
-    private void exPrepare(String message) { // название не оч хорошее, лучше - expectException
+    private void expectedException(String message) {
         expectedEx.expect(IllegalArgumentException.class);
         expectedEx.expectMessage(message);
     }
 
     @Test
-    public void addNullBookNullTitleConvertTest() {
-        mdd.addNewBook(new Book());
-        Assert.assertEquals("null", mdd.findAvailableBooks().get(0).title);
+    public void addNewBookNullTitleConvertTest() {
+        book0.title = null;
+        mdd.addNewBook(book0);
+        Assert.assertEquals("", mdd.findAvailableBooks().get(0).title);
     }
 
     @Test
@@ -86,22 +87,15 @@ public class MultiDeliveryDeskTest {
         Assert.assertEquals("book2", mdd.findAvailableBooks().get(2).title);
     }
 
-    /**
-     * Выдача книг происходит по id, title может быть null, "" или совпадать с таковым других книг.
-     * (Было бы логично выдавать именно по title,
-     * но при создании объекта Book идет неявная инициализация корректным для системы id=0,
-     * так что при незнании id будешь всегда получать книгу с id=0.
-     * В такой ситуации будем считать, что истинный id запрошенной книги известен.)
-     */
     @Test
     public void borrowNullBookTest() {
-        exPrepare("Book can't be null.");
+        expectedException("Book can't be null.");
         mdd.borrowBook(null, student1);
     }
 
     @Test
     public void borrowNullOrEmptyStudentTest() {
-        exPrepare("Student name can`t be null or empty. The book not been borrowed.");
+        expectedException("Student name can`t be null or empty. The book not been borrowed.");
         mdd.borrowBook(book0, null);
         mdd.borrowBook(book0, "  ");
     }
@@ -109,7 +103,7 @@ public class MultiDeliveryDeskTest {
     @Test
     public void borrowNotAvailableIdTest() {
         book3.id = 10;
-        exPrepare(String.format("There is no book with id=%d in the list of available books. The book not been borrowed.", book3.id));
+        expectedException(String.format("There is no book with id=%d in the list of available books. The book not been borrowed.", book3.id));
         addSomeBooks(book0, book1, book2);
         mdd.borrowBook(book3, student1);
     }
@@ -133,19 +127,15 @@ public class MultiDeliveryDeskTest {
         Assert.assertEquals(1, mdd.findAvailableBooks().get(0).id);
     }
 
-    /**
-     * При student=null, student="  ", book=null книга не возвращается.
-     * Книгу может вернуть только тот, кто ее брал.
-     */
     @Test
     public void returnNullBookTest() {
-        exPrepare("Book can't be null.");
+        expectedException("Book can't be null.");
         mdd.returnBook(null, student1);
     }
 
     @Test
     public void returnNullOrEmptyStudentTest() {
-        exPrepare("Student name can`t be null or empty. The book not been borrowed.");
+        expectedException("Student name can`t be null or empty. The book not been borrowed.");
         mdd.returnBook(book0, null);
         mdd.returnBook(book0, "  ");
     }
@@ -153,7 +143,7 @@ public class MultiDeliveryDeskTest {
     @Test
     public void returnNotBorrowedIdTest() {
         book1.id = 1;
-        exPrepare(String.format("There is no book with id=%d in the list of borrowed books. The book not been returned.", book1.id));
+        expectedException(String.format("There is no book with id=%d in the list of borrowed books. The book not been returned.", book1.id));
         mdd.addNewBook(book0);
         mdd.borrowBook(book0, student1);
         mdd.returnBook(book1, student1);
@@ -163,12 +153,11 @@ public class MultiDeliveryDeskTest {
     public void returnByAnotherStudentTest() {
         book1.id = 1;
         book1.title = "book1";
-        exPrepare(String.format("The book {%d, %s} must be returned by student %s. The book not been returned.", book1.id, book1.title, student1));
+        expectedException(String.format("The book {%d, %s} must be returned by student %s. The book not been returned.", book1.id, book1.title, student1));
         mdd.addNewBook(book1);
         mdd.borrowBook(book1, student1);
         Assert.assertEquals(0, mdd.findAvailableBooks().size());
         mdd.returnBook(book1, student3);
-        Assert.assertEquals(0, mdd.findAvailableBooks().size());
     }
 
     @Test
