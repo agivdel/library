@@ -1,6 +1,8 @@
 package agivdel.library;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,9 +27,9 @@ public class MultiDeliveryDesk implements Library {
      */
     @Override
     public void addNewBook(Book book) {
-        Utils.nullBookException(book);
+        checkBookIsNotNull(book);
         if (availableBooks.containsKey(book.id) || borrowedBooks.containsKey(book.id)) {
-            throw new IllegalArgumentException(String.format(Constants.alreadyAddedId, book.id));
+            throw new IllegalArgumentException(String.format("The book.id %d already added.", book.id));
         }
 
         //давеча ты говорил, что null title - это не круто
@@ -35,11 +37,38 @@ public class MultiDeliveryDesk implements Library {
         //при этом просто пустую строку ты никак не маскируешь?
         //то есть у тебя возможно и "", и "null", хотя логически это одно и то же
         //обычно программисты заменяют null на пустую строку, или наоборот, чтоб в системе было единственное представление пустой строки
-        String title = Utils.nullOrEmptyToCorrect(book.title);
-        if (Utils.isNotUniqueTitle(title, this)) {
-            System.out.println(Constants.notUniqueTitle + Utils.notUniqueTitleNumbers(title, this));
+
+        //АГ: null возникает, когда после создания объекта Book поле title вообще не трогали.
+        //А title="" означает, что поле после создания объекта меняли.
+        //Другими словами, для класса MultiDeliveryDesk это одна и та же ситуация, но для отправителя - разные.
+        //Я посчитал, что пусть программа не будет "слишком умной" и покажет разный результат,
+        //если пользователь подает ей на вход разные данные.
+        String title = nullOrEmptyToCorrect(book.title);
+        long notUniqueTitles = notUniqueTitleNumbers(title);
+        if (notUniqueTitles > 0) {
+            System.out.printf("The number of books with the same title is: %d%n", notUniqueTitles);
         }
         availableBooks.put(book.id, title);
+    }
+
+    public void checkBookIsNotNull(Book book) {
+        if (book == null) {
+            throw new IllegalArgumentException("Book can't be null.");
+        }
+    }
+
+    public String nullOrEmptyToCorrect(String str) {
+        if (str == null) {
+            str = "null";
+        } else {
+            str = str.trim();
+        }
+        return str;
+    }
+
+    public long notUniqueTitleNumbers(String title) {
+        return availableBooks.values().stream().filter(title::equals).count()
+                + borrowedBooks.values().stream().filter(b -> title.equals(b.bookTitle)).count();
     }
 
     /**
@@ -51,14 +80,24 @@ public class MultiDeliveryDesk implements Library {
      */
     @Override
     public void borrowBook(Book book, String student) {
-        Utils.nullBookException(book);
-        Utils.nullOrEmptyStudentNameException(student);
+        checkBookIsNotNull(book);
+        nullOrEmptyStudentNameException(student);
         if (!availableBooks.containsKey(book.id)) {
-            throw new IllegalArgumentException(String.format(Constants.notAvailableBook, book.id) + Constants.notBorrowed);
+            throw new IllegalArgumentException(String.format("There is no book with id=%d in the list of available books. The book not been borrowed.", book.id));
         }
         var borrowedTitle = availableBooks.remove(book.id);
         borrowedBooks.put(book.id, new TitleAndStudentName(borrowedTitle, student));
-        System.out.printf((Constants.tookTheBook) + "%n", student, book.id, borrowedTitle);
+        System.out.printf("Student %s took the book {%d, %s}.%n", student, book.id, borrowedTitle);
+    }
+
+    public void nullOrEmptyStudentNameException(String str) {
+        if (!isNotNullOrEmpty(str)) {
+            throw new IllegalArgumentException("Student name can`t be null or empty. The book not been borrowed.");
+        }
+    }
+
+    public boolean isNotNullOrEmpty(String str) {
+        return str != null && !"".equals(str.trim());
     }
 
     /**
@@ -67,18 +106,23 @@ public class MultiDeliveryDesk implements Library {
      */
     @Override
     public void returnBook(Book book, String student) {
-        Utils.nullBookException(book);
-        Utils.nullOrEmptyStudentNameException(student);
+        checkBookIsNotNull(book);
+        nullOrEmptyStudentNameException(student);
         if (!borrowedBooks.containsKey(book.id)) {
-            throw new IllegalArgumentException(String.format(Constants.notBorrowedBook, book.id) + Constants.notReturned);
+            throw new IllegalArgumentException(
+                    String.format("There is no book with id=%d in the list of borrowed books. The book not been returned.", book.id)
+            );
         }
         TitleAndStudentName returnedBook = borrowedBooks.get(book.id);
         if (!student.equals(returnedBook.studentName)) {
-            throw new IllegalArgumentException(String.format(Constants.mustBeReturned, book.id, returnedBook.bookTitle, returnedBook.studentName) + Constants.notReturned);
+            throw new IllegalArgumentException(
+                    String.format("The book {%d, %s} must be returned by student %s. The book not been returned.%n",
+                    book.id, returnedBook.bookTitle, returnedBook.studentName)
+            );
         }
         borrowedBooks.remove(book.id);
         availableBooks.put(book.id, returnedBook.bookTitle);
-        System.out.printf((Constants.returnedTheBook) + "%n", returnedBook.studentName, book.id, returnedBook.bookTitle);
+        System.out.printf("Student %s returned the book {%d, %s}.%n", returnedBook.studentName, book.id, returnedBook.bookTitle);
     }
 
     @Override
@@ -92,13 +136,5 @@ public class MultiDeliveryDesk implements Library {
             bookList.add(book);
         }
         return bookList;
-    }
-
-    public Map<Integer, String> getAvailableBooks() {
-        return availableBooks;
-    }
-
-    public Map<Integer, TitleAndStudentName> getBorrowedBooks() {
-        return borrowedBooks;
     }
 }

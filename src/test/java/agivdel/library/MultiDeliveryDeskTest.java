@@ -1,6 +1,9 @@
 package agivdel.library;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class MultiDeliveryDeskTest {
@@ -29,13 +32,13 @@ public class MultiDeliveryDeskTest {
 
     @Test
     public void addNullBookTest() {
-        exPrepare(Constants.nullBook);
+        exPrepare("Book can't be null.");
         mdd.addNewBook(null);
     }
 
     @Test
     public void addNotUniqueIdTest() {
-        exPrepare(String.format(Constants.alreadyAddedId, book1.id));
+        exPrepare(String.format("The book.id %d already added.", book1.id));
         addSomeBooks(book0);
         book1.id = 0;
         mdd.addNewBook(book1);
@@ -92,13 +95,13 @@ public class MultiDeliveryDeskTest {
      */
     @Test
     public void borrowNullBookTest() {
-        exPrepare(Constants.nullBook);
+        exPrepare("Book can't be null.");
         mdd.borrowBook(null, student1);
     }
 
     @Test
     public void borrowNullOrEmptyStudentTest() {
-        exPrepare(Constants.notNullOrEmptyStudentName + Constants.notBorrowed);
+        exPrepare("Student name can`t be null or empty. The book not been borrowed.");
         mdd.borrowBook(book0, null);
         mdd.borrowBook(book0, "  ");
     }
@@ -106,7 +109,7 @@ public class MultiDeliveryDeskTest {
     @Test
     public void borrowNotAvailableIdTest() {
         book3.id = 10;
-        exPrepare(String.format(Constants.notAvailableBook, book3.id) + Constants.notBorrowed);
+        exPrepare(String.format("There is no book with id=%d in the list of available books. The book not been borrowed.", book3.id));
         addSomeBooks(book0, book1, book2);
         mdd.borrowBook(book3, student1);
     }
@@ -136,13 +139,13 @@ public class MultiDeliveryDeskTest {
      */
     @Test
     public void returnNullBookTest() {
-        exPrepare(Constants.nullBook);
+        exPrepare("Book can't be null.");
         mdd.returnBook(null, student1);
     }
 
     @Test
     public void returnNullOrEmptyStudentTest() {
-        exPrepare(Constants.notNullOrEmptyStudentName + Constants.notBorrowed);
+        exPrepare("Student name can`t be null or empty. The book not been borrowed.");
         mdd.returnBook(book0, null);
         mdd.returnBook(book0, "  ");
     }
@@ -150,7 +153,7 @@ public class MultiDeliveryDeskTest {
     @Test
     public void returnNotBorrowedIdTest() {
         book1.id = 1;
-        exPrepare(String.format(Constants.notBorrowedBook, book1.id) + Constants.notReturned);
+        exPrepare(String.format("There is no book with id=%d in the list of borrowed books. The book not been returned.", book1.id));
         mdd.addNewBook(book0);
         mdd.borrowBook(book0, student1);
         mdd.returnBook(book1, student1);
@@ -160,7 +163,7 @@ public class MultiDeliveryDeskTest {
     public void returnByAnotherStudentTest() {
         book1.id = 1;
         book1.title = "book1";
-        exPrepare(String.format(Constants.mustBeReturned, book1.id, book1.title, student1) + Constants.notReturned);
+        exPrepare(String.format("The book {%d, %s} must be returned by student %s. The book not been returned.", book1.id, book1.title, student1));
         mdd.addNewBook(book1);
         mdd.borrowBook(book1, student1);
         Assert.assertEquals(0, mdd.findAvailableBooks().size());
